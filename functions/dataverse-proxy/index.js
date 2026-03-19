@@ -8,10 +8,38 @@ const fetch = require('node-fetch');
 module.exports = async function (context, req) {
   context.log('Dataverse proxy called:', req.method, req.url);
 
+  // Basic CORS handling so browsers and preflight requests behave predictably
+  const defaultCorsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+  };
+
+  // Respond to preflight immediately
+  if (req.method === 'OPTIONS') {
+    context.res = { status: 204, headers: defaultCorsHeaders };
+    return;
+  }
+
+  // Debug endpoint to help diagnose deployment/runtime issues quickly
+  if ((req.query && req.query.debug === '1') || (req.url && req.url.indexOf('debug=1') !== -1)) {
+    const diag = {
+      now: new Date().toISOString(),
+      method: req.method,
+      headers: req.headers,
+      env: {
+        DATAVERSE_URL: !!process.env.DATAVERSE_URL,
+        USE_MANAGED_IDENTITY: process.env.USE_MANAGED_IDENTITY || null,
+      }
+    };
+    context.res = { status: 200, headers: Object.assign({'Content-Type':'application/json'}, defaultCorsHeaders), body: diag };
+    return;
+  }
+
   const dataverseUrl = process.env.DATAVERSE_URL;
   if (!dataverseUrl) {
     context.log('Missing DATAVERSE_URL env var');
-    context.res = { status: 400, body: { error: 'DATAVERSE_URL not configured' } };
+    context.res = { status: 400, headers: defaultCorsHeaders, body: { error: 'DATAVERSE_URL not configured' } };
     return;
   }
 
@@ -64,18 +92,20 @@ module.exports = async function (context, req) {
     if (!resp.ok) {
       const text = await resp.text();
       context.log('Dataverse returned error', resp.status, text);
-      context.res = { status: 502, body: { error: 'Dataverse request failed', status: resp.status, details: text } };
+      context.res = { status: 502, headers: defaultCorsHeaders, body: { error: 'Dataverse request failed', status: resp.status, details: text } };
       return;
     }
 
-    const body = await resp.json();
+    // If Dataverse returns empty body, respond with empty array to avoid JSON parse errors client-side
+    const text = await resp.text();
+    const body = text ? JSON.parse(text) : { value: [] };
     context.res = {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: Object.assign({ 'Content-Type': 'application/json' }, defaultCorsHeaders),
       body
     };
   } catch (err) {
     context.log.error('Dataverse proxy error', err);
-    context.res = { status: 500, body: { error: err.message } };
+    context.res = { status: 500, headers: defaultCorsHeaders, body: { error: err.message } };
   }
 };
