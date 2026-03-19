@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@azure/identity": "^2.4.0",
+    "@azure/identity": "^4.13.0",
     "node-fetch": "^2.6.7"
   }
 }
