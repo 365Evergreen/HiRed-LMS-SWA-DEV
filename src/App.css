@@ -1,0 +1,4 @@
+:root { --bg: #f8fafc; --fg: #0f172a; }
+body{ margin:0; font-family: Inter, system-ui, Arial, sans-serif; background:var(--bg); color:var(--fg) }
+.app-root{ max-width:1000px; margin:48px auto; padding:24px; background:white; box-shadow:0 6px 18px rgba(12,13,14,0.06); border-radius:8px }
+header h1{ margin:0 0 12px }
