@@ -1,0 +1,12 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "DATAVERSE_URL": "https://yourorg.crm.dynamics.com",
+    "USE_MANAGED_IDENTITY": "0",
+    "TENANT_ID": "<tenant id>",
+    "DATAVERSE_CLIENT_ID": "<client id>",
+    "DATAVERSE_CLIENT_SECRET": "<client secret>"
+  }
+}

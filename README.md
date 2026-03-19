@@ -5,9 +5,10 @@ This folder is a starter scaffold to migrate the current Power App into an Azure
 Quick start (local):
 
 1. Install node and npm.
-2. cd azure-swa
+2. cd HiRed-LMS-SWA-DEV
 3. npm install
-4. npm run dev
+4. cd functions && npm install
+5. npm run dev
 
 Deploy:
 
@@ -21,6 +22,19 @@ Auth and Dataverse notes
   - Use the On-Behalf-Of flow to let the frontend sign-in with MSAL and the functions exchange tokens.
 
 - Implement the Dataverse logic in `functions/api/dataverse-proxy/index.js`.
+
+Managed Identity and local testing
+
+1. Recommended: enable System-assigned Managed Identity on the Function App in Azure. Create an Application User in Dataverse mapped to that identity and assign the `HiRed LMS Owner` role.
+2. For local testing, copy `functions/local.settings.json.example` to `functions/local.settings.json` and set `USE_MANAGED_IDENTITY` to `0` and provide `TENANT_ID`, `DATAVERSE_CLIENT_ID`, and `DATAVERSE_CLIENT_SECRET`.
+3. Run Functions locally with the Azure Functions Core Tools:
+
+```powershell
+cd functions
+func start
+```
+
+The proxy endpoint will be available at `http://localhost:7071/api/dataverse-proxy` and will return the top 10 `e365_learningcourses` records.
 
 If you want, I can:
 - Commit this scaffold into a new git repo in the workspace and create helpful scripts to push to a remote you provide, or
