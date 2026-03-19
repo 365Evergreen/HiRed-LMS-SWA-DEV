@@ -14,7 +14,9 @@ export default function CourseCardGrid(){
       try{
         const res = await fetch('/api/dataverse-proxy')
         if(!res.ok) throw new Error(`Proxy error ${res.status}`)
-        const data = await res.json()
+        // Safely handle empty responses (204) which would cause res.json() to throw
+        const text = await res.text()
+        const data = text ? JSON.parse(text) : { value: [] }
         if(mounted){
           setCourses(data.value || [])
         }
